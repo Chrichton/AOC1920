@@ -395,7 +395,7 @@ JH....#.....#.......#.#...#......EV                                             
   #...............#.....#.......#...#.....#.......#.....#...#.#.#.......#.......#.#.......#.....#.#.#.#.....#...........#
   #####################################.#####.#######.#######.###.#########.#####.#######################################
                                        O     C       N       X   F         S     W
-                                       G     K       B       L   Z         L     W
+                                       G     K       B       L   Z         L     W                                         
 """
 
 let maxX = input2
@@ -490,7 +490,7 @@ let endPoint = teleportPoints.filter{ $0.value == "ZZ" }.first!.key
 // Breadth first
 var queue = Queue<State>()
 
-queue.enQueue(key: State(startPoint: startPoint, mazePoints: points, teleportPoints: teleportPoints, visited: []))
+queue.enQueue(key: State(startPoint: startPoint, mazePoints: points, teleportPoints: teleportPoints, visited: [startPoint]))
 
 repeat {
     let state = queue.deQueue()!
@@ -499,7 +499,7 @@ repeat {
 
     for nextState in state.getNextStates() {
         if nextState.startPoint == endPoint {
-            print("\(nextState.visited.count) Steps")
+            print("\(nextState.visited.count - 1) Steps")
             break
         } else
         {
