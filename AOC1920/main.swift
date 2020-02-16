@@ -395,7 +395,7 @@ JH....#.....#.......#.#...#......EV                                             
   #...............#.....#.......#...#.....#.......#.....#...#.#.#.......#.......#.#.......#.....#.#.#.#.....#...........#
   #####################################.#####.#######.#######.###.#########.#####.#######################################
                                        O     C       N       X   F         S     W
-                                       G     K       B       L   Z         L     W                                         
+                                       G     K       B       L   Z         L     W
 """
 
 let maxX = input2
@@ -437,8 +437,6 @@ let teleportPoints = points
         }
 }
 
-print(points)
-
 extension Point {
     func getNeighbors() -> [Point] {
         return [
@@ -467,7 +465,7 @@ struct State {
         
         if let teleportName = teleportPoints[point] {
             let teleportDestination = getTeleportDestination(forPoint: point, withName: teleportName)
-            if let dest = teleportDestination {
+            if let dest = teleportDestination, !visited.contains(dest) {
                 result.append(dest)
             }
         }
