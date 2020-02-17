@@ -122,37 +122,6 @@ func getInnerRange(theMap: [String], outerRange: CGRect) -> CGRect {
 
 }
 
-//let input = """
-//         A
-//         A
-//  #######.#########
-//  #######.........#
-//  #######.#######.#
-//  #######.#######.#
-//  #######.#######.#
-//  #####  B    ###.#
-//BC...##  C    ###.#
-//  ##.##       ###.#
-//  ##...DE  F  ###.#
-//  #####    G  ###.#
-//  #########.#####.#
-//DE..#######...###.#
-//  #.#########.###.#
-//FG..#########.....#
-//  ###########.#####
-//             Z
-//             Z
-//"""
-//
-//let theMap = input
-//    .split(separator: "\n")
-//    .map{ String($0) }
-//let o = getOuterRange(theMap: theMap)
-//let i = getInnerRange(theMap: theMap, outerRange: o)
-//
-//print(o)
-//print(i)
-
 // ---------------------------------------------------------
 
 class Node<T> {
@@ -271,43 +240,43 @@ struct Point: Hashable {
 }
 
 let input2 = """
-                   A
-                   A
-  #################.#############
-  #.#...#...................#.#.#
-  #.#.#.###.###.###.#########.#.#
-  #.#.#.......#...#.....#.#.#...#
-  #.#########.###.#####.#.#.###.#
-  #.............#.#.....#.......#
-  ###.###########.###.#####.#.#.#
-  #.....#        A   C    #.#.#.#
-  #######        S   P    #####.#
-  #.#...#                 #......VT
-  #.#.#.#                 #.#####
-  #...#.#               YN....#.#
-  #.###.#                 #####.#
-DI....#.#                 #.....#
-  #####.#                 #.###.#
-ZZ......#               QG....#..AS
-  ###.###                 #######
-JO..#.#.#                 #.....#
-  #.#.#.#                 ###.#.#
-  #...#..DI             BU....#..LF
-  #####.#                 #.#####
-YN......#               VT..#....QG
-  #.###.#                 #.###.#
-  #.#...#                 #.....#
-  ###.###    J L     J    #.#.###
-  #.....#    O F     P    #.#...#
-  #.###.#####.#.#####.#####.###.#
-  #...#.#.#...#.....#.....#.#...#
-  #.#####.###.###.#.#.#########.#
-  #...#.#.....#...#.#.#.#.....#.#
-  #.###.#####.###.###.#.#.#######
-  #.#.........#...#.............#
-  #########.###.###.#############
-           B   J   C
-           U   P   P               
+             Z L X W       C
+             Z P Q B       K
+  ###########.#.#.#.#######.###############
+  #...#.......#.#.......#.#.......#.#.#...#
+  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###
+  #.#...#.#.#...#.#.#...#...#...#.#.......#
+  #.###.#######.###.###.#.###.###.#.#######
+  #...#.......#.#...#...#.............#...#
+  #.#########.#######.#.#######.#######.###
+  #...#.#    F       R I       Z    #.#.#.#
+  #.###.#    D       E C       H    #.#.#.#
+  #.#...#                           #...#.#
+  #.###.#                           #.###.#
+  #.#....OA                       WB..#.#..ZH
+  #.###.#                           #.#.#.#
+CJ......#                           #.....#
+  #######                           #######
+  #.#....CK                         #......IC
+  #.###.#                           #.###.#
+  #.....#                           #...#.#
+  ###.###                           #.#.#.#
+XF....#.#                         RF..#.#.#
+  #####.#                           #######
+  #......CJ                       NM..#...#
+  ###.#.#                           #.###.#
+RE....#.#                           #......RF
+  ###.###        X   X       L      #.#.#.#
+  #.....#        F   Q       P      #.#.#.#
+  ###.###########.###.#######.#########.###
+  #.....#...#.....#.......#...#.....#.#...#
+  #####.#.###.#######.#######.###.###.#.#.#
+  #.......#.......#.#.#.#.#...#...#...#.#.#
+  #####.###.#####.#.#.#.#.###.###.#.###.###
+  #.......#.....#.#...#...............#...#
+  #############.#.#.###.###################
+               A O F   N
+               A A D   M
 """
 
 let maxX = input2
@@ -420,16 +389,97 @@ repeat {
 
 // Zweiter Stern: ---------------------------------------------------------------
 
-let outerRange = getOuterRange(theMap: list)
-let innerRange = getInnerRange(theMap: list, outerRange: outerRange)
-    
+let innerRange = getInnerRange(theMap: list, outerRange: getOuterRange(theMap: list))
+
 let innerTeleportPoints =  Set(teleportPoints
     .map{ CGPoint(x: $0.key.x, y: $0.key.y) }
     .filter{ innerRange.contains($0) }
     .map{ Point(x: Int($0.x), y: Int($0.y)) })
 
-let outerTeleportPoints = Set(teleportPoints.map{ $0.key })
-    .subtracting(innerTeleportPoints)
+struct Visited: Hashable {
+    let point: Point
+    let level: Int
+}
 
-print(innerTeleportPoints.map{ teleportPoints[$0]})
-print(outerTeleportPoints.map{ teleportPoints[$0]})
+struct State2 {
+    let startPoint: Point
+    let mazePoints: Set<Point>
+    let teleportPoints: [Point:String]
+    let innerTeleportPoints: Set<Point>
+    let visited: Set<Visited>
+    let level: Int
+    
+    private func getTeleportDestination(forPoint: Point, withName: String) -> Point? {
+        teleportPoints
+            .filter{ $0.value == withName && $0.key != forPoint }.first?.key
+    }
+    
+    private func getNeighbors(_ point: Point) -> [Point] {
+        point.getNeighbors()
+            .filter{ mazePoints.contains($0) && !visited.contains(Visited(point: $0, level: level)) }
+    }
+    
+    private func getTeleportPoint(_ point: Point) -> Point? {
+        if let teleportName = teleportPoints[point] {
+            if teleportName == "ZZ" && level != 0 {
+                return nil
+            }
+            
+            if level == 0 && !innerTeleportPoints.contains(point) {
+                return nil
+            }
+            
+            return getTeleportDestination(forPoint: point, withName: teleportName)
+        }
+        
+        return nil
+    }
+    
+    func getNextStates() -> [State2] {
+        var states =  getNeighbors(startPoint)
+            .reduce(into: [State2]()) { accu, current in
+                accu.append(State2(startPoint: current,
+                                   mazePoints: mazePoints, teleportPoints: teleportPoints,
+                                   innerTeleportPoints: innerTeleportPoints,
+                                   visited: visited.union([Visited(point: current, level: level)]),
+                                   level: level))
+            }
+        
+        if let teleportPoint = getTeleportPoint(startPoint) {
+            let newLevel = innerTeleportPoints.contains(startPoint)
+                ? level + 1
+                : level - 1
+            if !visited.contains(Visited(point: teleportPoint, level: newLevel)) {
+                states.append(State2(startPoint: teleportPoint,
+                    mazePoints: mazePoints, teleportPoints: teleportPoints,
+                    innerTeleportPoints: innerTeleportPoints,
+                    visited: visited.union([Visited(point: teleportPoint, level: newLevel)]),
+                    level: newLevel))
+            }
+        }
+        
+        return states
+    }
+}
+
+let state2 = State2(startPoint: startPoint, mazePoints: points,
+                    teleportPoints: teleportPoints, innerTeleportPoints: innerTeleportPoints,
+                    visited: [Visited(point: startPoint, level: 0)], level: 0)
+
+var queue2 = Queue<State2>()
+
+queue2.enQueue(key: state2)
+
+repeat {
+    let state = queue2.deQueue()!
+
+    for nextState in state.getNextStates() {
+        if nextState.startPoint == endPoint && nextState.level == 0 {
+            print("\(nextState.visited.count - 1) Steps")
+            break
+        } else
+        {
+            queue2.enQueue(key: nextState)
+        }
+    }
+} while !queue2.isEmpty()
