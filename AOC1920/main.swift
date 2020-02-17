@@ -379,6 +379,7 @@ repeat {
     for nextState in state.getNextStates() {
         if nextState.startPoint == endPoint {
             print("\(nextState.visited.count - 1) Steps")
+            queue = Queue<State>()
             break
         } else
         {
@@ -476,6 +477,7 @@ repeat {
     for nextState in state.getNextStates() {
         if nextState.startPoint == endPoint && nextState.level == 0 {
             print("\(nextState.visited.count - 1) Steps")
+            queue2 = Queue<State2>()
             break
         } else
         {
